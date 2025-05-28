@@ -1,0 +1,39 @@
+[theme]
+# Primary color matches our gradient start
+primaryColor = "#6366f1"
+
+# Background colors for dark theme
+backgroundColor = "#0a0a0a"
+secondaryBackgroundColor = "#0f0f0f"
+
+# Text colors
+textColor = "#ffffff"
+
+# Font
+font = "sans serif"
+
+[browser]
+# Tab title
+gatherUsageStats = false
+
+[server]
+# Disable Streamlit's file watcher in production
+fileWatcherType = "none"
+
+# Hide the hamburger menu
+hideTopBar = false
+
+[client]
+# Disable the ability to take screenshots
+toolbarMode = "minimal"
+
+# Show error details
+showErrorDetails = false
+
+[runner]
+# Magic commands
+magicEnabled = false
+
+[ui]
+# Hide the footer
+hideFooterMenu = true
