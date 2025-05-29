@@ -1,2 +1,263 @@
-# Private files
-.private/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+streamboard_env/
+*.egg-info/
+.eggs/
+*.egg
+dist/
+build/
+develop-eggs/
+.installed.cfg
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.manifest
+*.spec
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+pythonenv*
+
+# Streamlit
+.streamlit/secrets.toml
+*.log
+
+# Environment Variables and Credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.pfx
+
+# Google Credentials
+*credentials*.json
+*client_secret*.json
+*service-account*.json
+token*.json
+token*.pickle
+*.p12
+
+# AWS Credentials
+.aws/
+aws_credentials
+aws_config
+
+# IDE and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+*.sublime-project
+*.sublime-workspace
+.ropeproject
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Testing
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.hypothesis/
+nosetests.xml
+coverage.xml
+*.cover
+.cache
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+
+# Documentation
+docs/_build/
+docs/_static/
+docs/_templates/
+site/
+
+# Logs and Databases
+*.log
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+
+# Cache and Temporary Files
+*.cache
+*.tmp
+*.temp
+.cache/
+tmp/
+temp/
+
+# Docker
+*.dockerignore
+docker-compose.override.yml
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+terraform.tfvars
+*.tfvars
+
+# CDK
+cdk.out/
+cdk.context.json
+
+# Node (for CDK)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# StreamBoard Specific
+/data/
+/cache/
+/logs/
+/exports/
+streamboard.pid
+
+# Security
+*.pem
+*.p12
+*.pfx
+*.key
+certificates/
+ssl/
+
+# Local development
+.env.local
+.env.development
+.env.production
+config.local.py
+settings.local.py
+
+# Analytics data exports
+*.csv
+*.xlsx
+*.xls
+exports/
+
+# Session files
+flask_session/
+sessions/
+
+# Monitoring
+*.rdb
+dump.rdb
+
+# macOS
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+.netrwhist
+tags
+[._]*.un~
+
+# JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+atlassian-ide-plugin.xml
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+.history/
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+
+# PyCharm
+.idea/
+*.iml
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# pytype
+.pytype/
+
+# Cython
+cython_debug/

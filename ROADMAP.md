@@ -1,12 +1,16 @@
 # Comprehensive Technical Plan for Custom Analytics Dashboard with Streamlit
 
+
 ## Executive Overview
+
 
 This technical plan provides a complete implementation guide for creating a production-ready analytics dashboard using Streamlit that integrates Google Analytics, Google AdSense, and AWS APIs. The solution emphasizes security, scalability, and developer efficiency with immediately actionable code examples.
 
 ## Architecture and Technology Stack
 
+
 ### Core Components
+
 
 - **Framework**: Streamlit (latest version)
 - **APIs**: Google Analytics GA4 Data API, Google AdSense Management API v2, AWS SDK (boto3)
@@ -16,7 +20,9 @@ This technical plan provides a complete implementation guide for creating a prod
 
 ## Phase 1: Development Environment Setup
 
+
 ### Project Structure
+
 
 ```
 analytics-dashboard/
@@ -42,6 +48,7 @@ analytics-dashboard/
 
 ### Essential Dependencies
 
+
 ```python
 # requirements.txt
 streamlit>=1.28.0
@@ -59,7 +66,9 @@ cryptography>=3.4.0
 
 ## Phase 2: API Integration Implementation
 
+
 ### Google Analytics GA4 Integration
+
 
 ```python
 # services/google_analytics.py
@@ -132,6 +141,7 @@ class GoogleAnalyticsService:
 
 ### Google AdSense Integration
 
+
 ```python
 # services/google_adsense.py
 from googleapiclient.discovery import build
@@ -188,6 +198,7 @@ class GoogleAdSenseService:
 ```
 
 ### AWS Integration
+
 
 ```python
 # services/aws_metrics.py
@@ -246,7 +257,9 @@ class AWSMetricsService:
 
 ## Phase 3: Streamlit Application Development
 
+
 ### Main Application Structure
+
 
 ```python
 # app.py
@@ -360,6 +373,7 @@ if __name__ == "__main__":
 
 ### Security Implementation
 
+
 ```python
 # utils/security.py
 import streamlit as st
@@ -402,7 +416,9 @@ def rate_limit(max_requests=50):
 
 ## Phase 4: AWS Deployment Strategy
 
+
 ### Deployment Comparison and Recommendation
+
 
 Based on the research, here's the optimal deployment strategy:
 
@@ -413,6 +429,7 @@ Based on the research, here's the optimal deployment strategy:
 - **Scalability**: Excellent with auto-scaling
 
 ### Optimized Dockerfile
+
 
 ```dockerfile
 # Multi-stage build for optimization
@@ -434,6 +451,7 @@ CMD ["streamlit", "run", "app.py"]
 ```
 
 ### Terraform Infrastructure
+
 
 ```hcl
 # deployment/terraform/main.tf
@@ -467,7 +485,9 @@ module "streamlit_dashboard" {
 
 ## Phase 5: Production Optimization
 
+
 ### Caching Strategy
+
 
 ```python
 # utils/cache.py
@@ -495,6 +515,7 @@ class SmartCache:
 ```
 
 ### Performance Monitoring
+
 
 ```python
 # utils/monitoring.py
@@ -524,7 +545,9 @@ class PerformanceMonitor:
 
 ## Phase 6: CI/CD Pipeline
 
+
 ### GitHub Actions Workflow
+
 
 ```yaml
 # .github/workflows/deploy.yml
@@ -564,7 +587,9 @@ jobs:
 
 ## Implementation Timeline
 
+
 ### Week 1-2: Foundation
+
 
 - Set up development environment
 - Implement Google Analytics integration
@@ -572,17 +597,20 @@ jobs:
 
 ### Week 3-4: API Integration
 
+
 - Complete AdSense integration
 - Implement AWS metrics collection
 - Add authentication and security
 
 ### Week 5-6: Production Deployment
 
+
 - Set up AWS infrastructure
 - Implement caching and optimization
 - Deploy to staging environment
 
 ### Week 7-8: Polish and Launch
+
 
 - Performance testing and optimization
 - Security audit
@@ -591,6 +619,7 @@ jobs:
 
 ## Key Success Factors
 
+
 1. **Security First**: All credentials in AWS Secrets Manager, never in code
 2. **Performance**: Aggressive caching with appropriate TTLs
 3. **Monitoring**: CloudWatch dashboards for all metrics
@@ -598,6 +627,7 @@ jobs:
 5. **User Experience**: Responsive design with loading indicators
 
 ## Next Steps
+
 
 1. Clone the repository structure
 2. Set up AWS account and Google Cloud credentials
