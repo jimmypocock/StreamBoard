@@ -168,6 +168,7 @@ certificates/
 ssl/
 
 # Local development
+.env
 .env.local
 .env.development
 .env.production
@@ -261,3 +262,6 @@ dmypy.json
 
 # Cython
 cython_debug/
+
+# Private files
+.private/

@@ -80,7 +80,8 @@ class OAuth2Manager:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     self.client_secrets_file, self.scopes
                 )
-                creds = flow.run_local_server(port=0)
+                # Use a fixed port for consistent redirect URI
+                creds = flow.run_local_server(port=8080)
             
             # Save credentials for next run
             with open(self.token_file, 'w') as token:

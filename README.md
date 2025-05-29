@@ -45,6 +45,11 @@ cd streamboard
 cp .env.example .env
 # Edit .env with your credentials
 
+# Test your API connections (recommended)
+python tests/test_ga_access.py
+python tests/test_adsense_access.py
+python tests/test_aws_access.py
+
 # Start StreamBoard
 ./streamboard start
 ```
@@ -281,33 +286,104 @@ See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed AWS deployment instr
 - 🔄 Facebook Ads (Coming Soon)
 - 🔄 Shopify (Coming Soon)
 
+## 🧪 Testing
+
+### API Connection Test Scripts
+
+StreamBoard includes test scripts to verify your API credentials and permissions before running the full dashboard:
+
+#### Test Google Analytics Access
+```bash
+python tests/test_ga_access.py
+```
+This script will:
+- Verify service account credentials
+- Check API access to configured properties
+- Display available metrics from the last 7 days
+- Show any permission errors
+
+#### Test Google AdSense Access
+```bash
+python tests/test_adsense_access.py
+```
+This script will:
+- Initiate OAuth2 authentication flow if needed
+- Verify AdSense Management API access
+- Display account information
+- Show recent earnings data
+
+#### Test AWS Access
+```bash
+python tests/test_aws_access.py
+```
+This script will:
+- Verify AWS credentials for each configured account
+- Test permissions for EC2, S3, RDS, CloudWatch, and Cost Explorer
+- Display resource counts and status
+- Check regional access
+
+### Running All Tests
+```bash
+# Test all configured services
+python tests/test_ga_access.py && python tests/test_adsense_access.py && python tests/test_aws_access.py
+```
+
+### Common Test Issues
+
+- **"Permission denied" errors**: Check service account/IAM permissions
+- **"API not enabled" errors**: Enable the required APIs in Google Cloud Console
+- **"Invalid credentials" errors**: Verify credential file paths in .env
+- **No data returned**: Some APIs require 24-48 hours of data before returning results
+
 ## 🔍 Troubleshooting
 
+### Test Script Issues
+
+#### Google Analytics Tests
+- **"No data found"**: GA4 properties need at least 24 hours of data
+- **"Invalid property ID"**: Use numbers only (e.g., 123456789, not GA-123456789)
+- **"Credentials not found"**: Check file path is absolute, not relative
+- **"403 Forbidden"**: Service account needs "Viewer" role in GA4 property
+
+#### AdSense Tests
+- **"Authorization required"**: Delete token file and re-run to re-authenticate
+- **"No AdSense account"**: Ensure the Google account has an active AdSense account
+- **"Scope error"**: Client must have AdSense Management API scope
+- **"Token expired"**: Re-run the script to refresh authentication
+
+#### AWS Tests
+- **"Invalid security token"**: AWS credentials may be expired
+- **"Access denied"**: Add required permissions to IAM user
+- **"Cost data unavailable"**: New AWS accounts need 24 hours for Cost Explorer activation
+- **"Region error"**: Ensure the specified region is valid and accessible
 
 ### Multi-Account Issues
-
 
 - **Account not showing**: Check JSON syntax in environment variables
 - **Mixed data**: Ensure each account has a unique name
 - **Authentication errors**: Each account needs its own credentials
+- **Performance issues**: Consider enabling/disabling accounts as needed
 
 ### Google Analytics
 
 - Check service account has "Viewer" access to all properties
 - Verify property IDs are correct (numbers only)
 - Ensure Analytics Data API is enabled
+- Service account email must be added to each GA4 property
 
 ### Google AdSense
 
 - Delete token files to re-authenticate accounts
 - Check AdSense Management API is enabled
 - Verify OAuth2 client type is "Desktop"
+- Each account needs its own client secrets file
 
 ### AWS
 
 - Verify IAM permissions for each account
 - Check Cost Explorer is enabled (24h delay for new accounts)
 - Ensure credentials are valid and not expired
+- Cost data requires specific permissions: ce:GetCostAndUsage
 
 ## 🔒 Security Best Practices
 
@@ -329,20 +405,73 @@ See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed AWS deployment instr
 
 ## 🛠️ Development
 
+### Development Setup
 
 ```bash
-# Install development dependencies
-pip install -e .
+# Create and activate virtual environment
+python -m venv streamboard_env
+source streamboard_env/bin/activate  # On Windows: streamboard_env\Scripts\activate
 
-# Run tests
-pytest
+# Install dependencies
+pip install -r requirements.txt
 
-# Format code
-black .
+# Note: This project doesn't use setup.py, so 'pip install -e .' won't work
+# Simply run scripts directly from the project directory
 
-# Check types
-mypy .
+# Run API connection tests (these are standalone scripts, not pytest tests)
+python tests/test_ga_access.py
+python tests/test_adsense_access.py
+python tests/test_aws_access.py
 ```
+
+### Testing During Development
+
+#### Before Running the Dashboard
+1. Test individual service connections:
+   ```bash
+   # Test a specific service
+   python tests/test_ga_access.py
+   ```
+
+2. Verify configuration:
+   ```bash
+   # Check environment variables
+   python -c "from config.settings import Settings; s = Settings(); print(s.dict())"
+   ```
+
+3. Test with mock data:
+   ```bash
+   # The dashboard currently uses mock data by default
+   streamlit run app.py
+   ```
+
+#### Adding New Tests
+When implementing new features:
+1. Create test scripts following the pattern of existing test_*.py files
+2. Test API connections before integrating into the dashboard
+3. Use try/except blocks to handle API errors gracefully
+
+#### Debugging Tips
+- Enable Streamlit debug mode: `streamlit run app.py --logger.level=debug`
+- Check Streamlit logs: `~/.streamlit/logs/`
+- Test individual service classes in Python REPL:
+  ```python
+  from services.google_analytics import GoogleAnalytics
+  ga = GoogleAnalytics()
+  # Test methods here
+  ```
+
+### Future Testing Infrastructure
+
+The project is designed to support a full testing suite in the future. Currently, the test_*.py files are standalone API verification scripts, not pytest tests.
+
+Future testing plans include:
+- Unit tests for service classes
+- Integration tests with mocked API responses
+- UI tests for Streamlit components
+- Automated test suite with pytest
+
+See ROADMAP.md for planned testing infrastructure improvements.
 
 ## 🤝 Contributing
 

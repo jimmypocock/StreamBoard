@@ -192,19 +192,19 @@ with st.sidebar:
     
     # Show service status
     if settings.ENABLE_GOOGLE_ANALYTICS:
-        if services.get('ga') and services['ga'].client:
+        if services.get('ga') and hasattr(services['ga'], 'accounts') and services['ga'].accounts:
             st.success("✅ Google Analytics")
         else:
             st.error("❌ Google Analytics")
     
     if settings.ENABLE_GOOGLE_ADSENSE:
-        if services.get('adsense') and services['adsense'].service:
+        if services.get('adsense') and hasattr(services['adsense'], 'accounts') and services['adsense'].accounts:
             st.success("✅ Google AdSense")
         else:
             st.error("❌ Google AdSense")
     
     if settings.ENABLE_AWS_METRICS:
-        if services.get('aws') and services['aws'].ce_client:
+        if services.get('aws') and hasattr(services['aws'], 'accounts') and services['aws'].accounts:
             st.success("✅ AWS Metrics")
         else:
             st.error("❌ AWS Metrics")
@@ -234,8 +234,9 @@ with col2:
     start_date = end_date - timedelta(days=date_range)
     st.markdown(f"**{start_date.strftime('%b %d')} - {end_date.strftime('%b %d, %Y')}**")
 with col3:
-    if services.get('ga'):
-        realtime_users = services['ga'].get_realtime_users()
+    if services.get('ga') and services['ga'].has_active_accounts():
+        # Get total realtime users across all accounts
+        realtime_users = services['ga'].get_total_realtime_users()
         st.metric("Live Users", realtime_users)
 
 # Tabs for different sections
@@ -250,9 +251,33 @@ with tab1:
     else:
         st.header("Website Analytics")
         
+        # Account selector
+        account_names = services['ga'].list_active_account_names()
+        if len(account_names) > 1:
+            view_mode = st.radio(
+                "View Mode",
+                ["All Accounts (Combined)", "Individual Account"],
+                horizontal=True
+            )
+            
+            if view_mode == "Individual Account":
+                selected_account = st.selectbox(
+                    "Select Account",
+                    account_names,
+                    help="Choose a specific Google Analytics property to view"
+                )
+            else:
+                selected_account = None
+        else:
+            view_mode = "Individual Account"
+            selected_account = account_names[0] if account_names else None
+        
         # Overview metrics
         try:
-            metrics = services['ga'].get_overview_metrics(date_range)
+            if view_mode == "All Accounts (Combined)" or not selected_account:
+                metrics = services['ga'].get_all_accounts_overview(date_range)
+            else:
+                metrics = services['ga'].get_overview_metrics(selected_account, date_range)
             
             col1, col2, col3, col4 = st.columns(4)
             
@@ -293,7 +318,10 @@ with tab1:
         with col1:
             st.subheader("Traffic Trend")
             try:
-                traffic_data = services['ga'].get_traffic_data(date_range)
+                if view_mode == "All Accounts (Combined)" or not selected_account:
+                    traffic_data = services['ga'].get_all_accounts_traffic(date_range)
+                else:
+                    traffic_data = services['ga'].get_traffic_data(selected_account, date_range)
                 
                 if not traffic_data.empty:
                     # Convert date string to datetime if needed
@@ -353,7 +381,10 @@ with tab1:
         with col2:
             st.subheader("Device Breakdown")
             try:
-                device_data = services['ga'].get_device_data(date_range)
+                if view_mode == "All Accounts (Combined)" or not selected_account:
+                    device_data = services['ga'].get_all_accounts_devices(date_range)
+                else:
+                    device_data = services['ga'].get_device_data(selected_account, date_range)
                 
                 if not device_data.empty:
                     fig = px.pie(
@@ -379,15 +410,45 @@ with tab1:
         # Top pages
         st.subheader("Top Pages")
         try:
-            top_pages = services['ga'].get_top_pages(date_range)
+            if view_mode == "Individual Account" and selected_account:
+                top_pages = services['ga'].get_top_pages(selected_account, date_range)
+            else:
+                # For combined view, show top pages from all accounts
+                # This could be improved to aggregate across all accounts
+                account_names = services['ga'].list_active_account_names()
+                if account_names:
+                    top_pages = services['ga'].get_top_pages(account_names[0], date_range)
+                    if len(account_names) > 1:
+                        st.caption(f"Showing top pages from: {account_names[0]}")
+                else:
+                    top_pages = pd.DataFrame()
             
             if not top_pages.empty:
                 # Format the data for display
                 display_df = top_pages.copy()
-                display_df.columns = ['Page', 'Views', 'Users', 'Avg. Time (sec)']
-                display_df['Views'] = display_df['Views'].apply(lambda x: f"{x:,}")
-                display_df['Users'] = display_df['Users'].apply(lambda x: f"{x:,}")
-                display_df['Avg. Time (sec)'] = display_df['Avg. Time (sec)'].apply(lambda x: f"{x:.0f}")
+                
+                # Rename columns based on what's actually present
+                column_mapping = {
+                    'pagePath': 'Page',
+                    'screenPageViews': 'Views',
+                    'activeUsers': 'Users',
+                    'averageSessionDuration': 'Avg. Time (sec)'
+                }
+                
+                # Only rename columns that exist
+                display_df = display_df.rename(columns={k: v for k, v in column_mapping.items() if k in display_df.columns})
+                
+                # Drop any extra columns (like 'account')
+                expected_columns = ['Page', 'Views', 'Users', 'Avg. Time (sec)']
+                display_df = display_df[[col for col in expected_columns if col in display_df.columns]]
+                
+                # Format numeric columns
+                if 'Views' in display_df.columns:
+                    display_df['Views'] = display_df['Views'].apply(lambda x: f"{int(x):,}" if pd.notna(x) else "0")
+                if 'Users' in display_df.columns:
+                    display_df['Users'] = display_df['Users'].apply(lambda x: f"{int(x):,}" if pd.notna(x) else "0")
+                if 'Avg. Time (sec)' in display_df.columns:
+                    display_df['Avg. Time (sec)'] = display_df['Avg. Time (sec)'].apply(lambda x: f"{float(x):.0f}" if pd.notna(x) else "0")
                 
                 st.dataframe(
                     display_df,
@@ -411,7 +472,7 @@ with tab2:
         
         # Overview metrics
         try:
-            earnings = services['adsense'].get_earnings_overview(date_range)
+            earnings = services['adsense'].get_all_accounts_earnings(date_range)
             
             col1, col2, col3, col4 = st.columns(4)
             
@@ -448,7 +509,7 @@ with tab2:
         # Daily earnings chart
         st.subheader("Daily Earnings Trend")
         try:
-            daily_earnings = services['adsense'].get_daily_earnings(date_range)
+            daily_earnings = services['adsense'].get_all_accounts_daily_earnings(date_range)
             
             if not daily_earnings.empty:
                 fig = go.Figure()
@@ -495,7 +556,7 @@ with tab2:
         with col1:
             st.subheader("Earnings by Site")
             try:
-                site_earnings = services['adsense'].get_earnings_by_site(date_range)
+                site_earnings = services['adsense'].get_all_accounts_site_earnings(date_range)
                 
                 if not site_earnings.empty:
                     fig = px.bar(
@@ -526,22 +587,27 @@ with tab2:
         with col2:
             st.subheader("Top Performing Pages")
             try:
-                top_pages = services['adsense'].get_top_performing_pages(date_range, limit=5)
-                
-                if not top_pages.empty:
-                    # Format for display
-                    display_df = top_pages[['page', 'earnings', 'rpm']].copy()
-                    display_df.columns = ['Page', 'Earnings', 'RPM']
-                    display_df['Earnings'] = display_df['Earnings'].apply(lambda x: f"${x:.2f}")
-                    display_df['RPM'] = display_df['RPM'].apply(lambda x: f"${x:.2f}")
+                # Get top pages from first active account (no aggregated method available)
+                account_names = services['adsense'].list_active_account_names()
+                if account_names:
+                    top_pages = services['adsense'].get_top_performing_pages(account_names[0], date_range, limit=5)
                     
-                    st.dataframe(
-                        display_df,
-                        use_container_width=True,
-                        hide_index=True
-                    )
+                    if not top_pages.empty:
+                        # Format for display
+                        display_df = top_pages[['page', 'earnings', 'rpm']].copy()
+                        display_df.columns = ['Page', 'Earnings', 'RPM']
+                        display_df['Earnings'] = display_df['Earnings'].apply(lambda x: f"${x:.2f}")
+                        display_df['RPM'] = display_df['RPM'].apply(lambda x: f"${x:.2f}")
+                        
+                        st.dataframe(
+                            display_df,
+                            use_container_width=True,
+                            hide_index=True
+                        )
+                    else:
+                        st.info("No page performance data available.")
                 else:
-                    st.info("No page performance data available.")
+                    st.info("No active AdSense accounts configured.")
                     
             except Exception as e:
                 st.error(f"Error loading top pages: {str(e)}")

@@ -124,6 +124,10 @@ class Settings:
         errors = []
         warnings = []
         
+        # Debug: Print what services are enabled
+        if cls.DEBUG:
+            print(f"DEBUG: Services enabled - GA: {cls.ENABLE_GOOGLE_ANALYTICS}, AdSense: {cls.ENABLE_GOOGLE_ADSENSE}, AWS: {cls.ENABLE_AWS_METRICS}")
+        
         # Check if at least one service is enabled
         if not any([cls.ENABLE_GOOGLE_ANALYTICS, cls.ENABLE_GOOGLE_ADSENSE, cls.ENABLE_AWS_METRICS]):
             warnings.append("No services are enabled. Enable at least one service in your .env file.")
@@ -131,6 +135,10 @@ class Settings:
         # Validate Google Analytics
         if cls.ENABLE_GOOGLE_ANALYTICS:
             ga_accounts = cls.get_google_analytics_accounts()
+            if cls.DEBUG:
+                print(f"DEBUG: GA accounts loaded: {len(ga_accounts) if ga_accounts else 0}")
+                if ga_accounts:
+                    print(f"DEBUG: GA accounts: {ga_accounts}")
             if not ga_accounts:
                 errors.append("Google Analytics is enabled but no accounts are configured")
             else:

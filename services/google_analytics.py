@@ -36,11 +36,18 @@ class GoogleAnalyticsService(MultiAccountService):
             scopes=['https://www.googleapis.com/auth/analytics.readonly']
         )
         
+        # Debug: Print service account email
+        if hasattr(credentials, 'service_account_email'):
+            print(f"DEBUG: Using service account: {credentials.service_account_email}")
+        
         client = BetaAnalyticsDataClient(credentials=credentials)
+        
+        property_id = config['property_id']
+        print(f"DEBUG: Connecting to GA4 property: {property_id}")
         
         return {
             'client': client,
-            'property_id': config['property_id']
+            'property_id': property_id
         }
     
     def get_account_summary(self, account_name: str) -> Dict[str, Any]:
@@ -207,6 +214,12 @@ class GoogleAnalyticsService(MultiAccountService):
         
         # Aggregate by date
         if not combined.empty and 'date' in combined.columns:
+            # Ensure numeric types for aggregation
+            numeric_columns = ['activeUsers', 'sessions', 'screenPageViews', 'bounceRate']
+            for col in numeric_columns:
+                if col in combined.columns:
+                    combined[col] = pd.to_numeric(combined[col], errors='coerce')
+            
             aggregated = combined.groupby('date').agg({
                 'activeUsers': 'sum',
                 'sessions': 'sum',
@@ -277,6 +290,12 @@ class GoogleAnalyticsService(MultiAccountService):
         
         # Aggregate by device category
         if not combined.empty and 'deviceCategory' in combined.columns:
+            # Ensure numeric types for aggregation
+            numeric_columns = ['activeUsers', 'sessions', 'bounceRate']
+            for col in numeric_columns:
+                if col in combined.columns:
+                    combined[col] = pd.to_numeric(combined[col], errors='coerce')
+            
             aggregated = combined.groupby('deviceCategory').agg({
                 'activeUsers': 'sum',
                 'sessions': 'sum',
